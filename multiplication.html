@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplication Practice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 25px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+        h1, h3 {
+            text-align: center;
+        }
+        .start-section, .quiz-section, .summary-section {
+            margin-top: 20px;
+        }
+        .start-section select, .start-section button {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+        }
+        .timeout-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .timeout-container label {
+            margin-right: 10px;
+            font-size: 0.9em;
+            color: #555;
+        }
+        .quiz-section {
+            display: none;
+        }
+        .question-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px 0;
+        }
+        .question {
+            font-size: 2em;
+            margin-right: 10px;
+        }
+        .answer-box {
+            width: 80px;
+            height: 50px;
+            font-size: 1.5em;
+            text-align: center;
+            border-radius: 5px;
+            border: 2px solid #ccc;
+            margin-right: 20px; /* Increased space after input box */
+            transition: background-color 0.5s, color 0.5s;
+        }
+
+        .feedback {
+            font-size: 3em; /* 2x bigger as requested */
+            margin-left: 20px; /* Add some space between the input box and the feedback */
+            font-weight: bold; /* Make it more visually prominent */
+        }
+
+        .correct {
+            color: darkgreen;
+        }
+        .wrong {
+            color: red;
+        }
+        .summary-section {
+            display: none;
+        }
+        .summary-section table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .summary-section table th, .summary-section table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        .summary-section .right {
+            color: green;
+            font-weight: bold;
+        }
+        .summary-section .wrong {
+            color: red;
+            font-weight: bold;
+        }
+        #start-btn, #restart-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #start-btn:hover, #restart-btn:hover {
+            background-color: #45a049;
+        }
+        #timer-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+        #timer {
+            font-size: 1.2em;
+        }
+        .counter {
+            font-size: 1.2em;
+        }
+        /* Pastel Colors */
+        .bg-lightgreen {
+            background-color: #d4edda;
+        }
+        .bg-orange {
+            background-color: #ffe5b4;
+        }
+        .bg-darkorange {
+            background-color: #ffcc80;
+        }
+        .bg-red {
+            background-color: #ffcccc;
+        }
+        /* Discreet Timeout Selector */
+        .timeout-container select {
+            width: 60px;
+            padding: 5px;
+            font-size: 0.9em;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 id="main-title">Multiplication Practice</h1>
+    
+    <div class="start-section" id="start-section">
+        <h3>Pick a number between 3 and 9 to practice</h3>
+        <select id="table-select">
+            <option value="" disabled selected>Select a table</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+        </select>
+        <div class="timeout-container">
+            <label for="timeout-select">Time Out (s):</label>
+            <select id="timeout-select">
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8" selected>8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+            </select>
+        </div>
+        <button id="start-btn">Start</button>
+    </div>
+
+    <div class="quiz-section" id="quiz-section">
+        <div class="question-container">
+            <div class="question" id="question-display">Question goes here</div>
+            <input type="text" id="answer-input" class="answer-box" autocomplete="off">
+            <div class="feedback" id="feedback"></div>
+        </div>
+        <div id="timer-container">
+            <div class="counter" id="correct-count">Correct: 0</div>
+            <div id="timer">Time Left: <span id="time-left">8</span>s</div>
+            <div class="counter" id="wrong-count">Wrong: 0</div>
+        </div>
+    </div>
+
+    <div class="summary-section" id="summary-section">
+        <h3>Results</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Question</th>
+                    <th>Your Answer</th>
+                    <th>Correct Answer</th>
+                    <th>Time Taken (s)</th>
+                </tr>
+            </thead>
+            <tbody id="summary-body">
+                <!-- Summary will be populated here -->
+            </tbody>
+        </table>
+        <h3 id="final-score"></h3>
+        <h3 id="average-time"></h3>
+        <button id="restart-btn">Restart</button>
+    </div>
+</div>
+
+<!-- Audio Elements -->
+<!-- Replace the src attributes with your own audio file URLs or Base64-encoded audio data -->
+<audio id="correct-sound">
+    <source src="https://www.soundjay.com/buttons/sounds/button-4.mp3" type="audio/mp3">
+    Your browser does not support the audio element.
+</audio>
+<audio id="wrong-sound">
+    <source src="https://www.soundjay.com/buttons/sounds/button-10.mp3" type="audio/mp3">
+    Your browser does not support the audio element.
+</audio>
+
+<script>
+    // Sound Effects
+    const correctSound = document.getElementById('correct-sound');
+    const wrongSound = document.getElementById('wrong-sound');
+
+    let selectedTable;
+    let timeoutSeconds = 8;
+    let questionsQueue = [];
+    let summaryData = [];
+    let correctAnswers = 0;
+    let wrongAnswers = 0;
+    let timeoutTimer;
+    let timeToAnswerStart;
+    let timeToAnswerEnd;
+    let timeToAnswer;
+    let isAnswered = false;
+    let currentQuestionGlobal = null;
+    let consecutiveTimeouts = 0; // Track consecutive timeouts
+
+    const startBtn = document.getElementById('start-btn');
+    const restartBtn = document.getElementById('restart-btn');
+    const tableSelect = document.getElementById('table-select');
+    const timeoutSelect = document.getElementById('timeout-select');
+    const mainTitle = document.getElementById('main-title');
+    const startSection = document.getElementById('start-section');
+    const quizSection = document.getElementById('quiz-section');
+    const summarySection = document.getElementById('summary-section');
+    const questionDisplay = document.getElementById('question-display');
+    const answerInput = document.getElementById('answer-input');
+    const feedback = document.getElementById('feedback');
+    const timeLeftSpan = document.getElementById('time-left');
+    const correctCount = document.getElementById('correct-count');
+    const wrongCount = document.getElementById('wrong-count');
+    const summaryBody = document.getElementById('summary-body');
+    const finalScore = document.getElementById('final-score');
+    const averageTime = document.getElementById('average-time');
+
+    startBtn.addEventListener('click', startQuiz);
+    restartBtn.addEventListener('click', restartQuiz);
+    answerInput.addEventListener('keyup', handleAnswerSubmit);
+    answerInput.addEventListener('input', handleTyping);
+
+    function startQuiz() {
+        selectedTable = parseInt(tableSelect.value);
+        if (isNaN(selectedTable)) {
+            alert('Please select a multiplication table to practice.');
+            return;
+        }
+        timeoutSeconds = parseInt(timeoutSelect.value);
+        mainTitle.textContent = `Table ${selectedTable}`;
+        generateInitialQuestions();
+        startSection.style.display = 'none';
+        quizSection.style.display = 'block';
+        askNextQuestion();
+    }
+
+    function restartQuiz() {
+        // Reset all variables
+        questionsQueue = [];
+        summaryData = [];
+        correctAnswers = 0;
+        wrongAnswers = 0;
+        correctCount.textContent = 'Correct: 0';
+        wrongCount.textContent = 'Wrong: 0';
+        summaryBody.innerHTML = '';
+        finalScore.textContent = '';
+        averageTime.textContent = '';
+        feedback.textContent = '';
+        answerInput.value = '';
+        answerInput.style.backgroundColor = '';
+        answerInput.style.color = '';
+        mainTitle.textContent = 'Multiplication Practice';
+        quizSection.style.display = 'none';
+        summarySection.style.display = 'none';
+        startSection.style.display = 'block';
+    }
+
+    function generateInitialQuestions() {
+        let multipliers = [2,3,4,5,6,7,8,9];
+        // Shuffle multipliers
+        multipliers = shuffleArray(multipliers);
+        // Create 20 questions by cycling through shuffled multipliers
+        let i = 0;
+        while (questionsQueue.length < 5) { // # questions
+            questionsQueue.push({ table: selectedTable, multiplier: multipliers[i % multipliers.length] });
+            i++;
+        }
+    }
+
+    function updateCounters() {
+        correctCount.textContent = `Correct: ${correctAnswers}`;
+        wrongCount.textContent = `Wrong: ${wrongAnswers}`;
+    }
+
+    function askNextQuestion() {
+        if (questionsQueue.length === 0) {
+            // All questions answered correctly
+            showSummary();
+            return;
+        }
+        
+        const currentQuestion = questionsQueue.shift();
+        currentQuestionGlobal = currentQuestion;
+        
+        const isMultiplierOnLeft = Math.random() < 0.5; // 50% chance
+
+        if (isMultiplierOnLeft) {
+            // Multiplier on the left side
+            questionDisplay.textContent = `${currentQuestion.table} x ${currentQuestion.multiplier} =`;
+        } else {
+            // Multiplier on the right side
+            questionDisplay.textContent = `${currentQuestion.multiplier} x ${currentQuestion.table} =`;
+        }
+
+        answerInput.value = '';
+        feedback.textContent = '';
+        resetInputBox();
+        updateCounters();
+        startTimers();
+    }
+
+    function handleAnswerSubmit(e) {
+        if (e.key === 'Enter') {
+            if (!isAnswered) {
+                validateAnswer();
+            }
+        }
+    }
+
+    let typingTimer;
+    const typingDelay = 1200; // 1s delay after typing stops
+
+    function handleTyping(e) {
+        if (!isAnswered) {
+            if (!timeToAnswerStart) {
+                timeToAnswerStart = Date.now();
+            }
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                if (!isAnswered) {
+                    validateAnswer();
+                }
+            }, typingDelay);
+        }
+    }
+
+    function startTimers() {
+        isAnswered = false;
+        timeToAnswerStart = null;
+        timeToAnswerEnd = null;
+        timeToAnswer = 0;
+        timeLeft = timeoutSeconds; // Use a separate variable for countdown
+        timeLeftSpan.textContent = timeLeft;
+    
+        // Start timeout timer
+        timeoutTimer = setInterval(() => {
+            timeLeft--; // Decrease the countdown variable
+            timeLeftSpan.textContent = timeLeft;
+            updateInputBoxColor();
+
+            if (timeLeft <= 0) {
+                clearInterval(timeoutTimer);
+                if (!isAnswered) {
+                    validateAnswer(true); // Trigger timeout validation
+                }
+            }
+        }, 1000);
+
+        // Record start time for time to answer
+        timeToAnswerStart = Date.now();
+    }
+
+    function updateInputBoxColor() {
+        if (timeoutSeconds === 5) {
+            answerInput.style.backgroundColor = '#ffe5b4'; // pastel orange
+        } else if (timeoutSeconds === 3) {
+            answerInput.style.backgroundColor = '#ffcc80'; // pastel dark orange
+        } else if (timeoutSeconds === 1) {
+            answerInput.style.backgroundColor = '#ffcccc'; // pastel red
+        }
+    }
+
+    function resetInputBox() {
+        answerInput.classList.remove('bg-lightgreen', 'bg-orange', 'bg-darkorange', 'bg-red');
+        answerInput.style.backgroundColor = '#d4edda'; // light green
+        answerInput.style.color = 'black';
+    }
+
+    function validateAnswer(isTimeout = false) {
+        isAnswered = true;
+        clearInterval(timeoutTimer);
+        let userAnswerRaw = answerInput.value;
+        let userAnswer = userAnswerRaw.replace(/\D/g, ''); // Strip non-numeric chars
+        let correctAnswer = currentQuestionGlobal.table * currentQuestionGlobal.multiplier;
+
+        if (isTimeout) {
+            // Handle timeouts
+            timeToAnswer = ((Date.now() - timeToAnswerStart) / 1000).toFixed(2);
+            if (timeToAnswer > parseInt(timeoutSelect.value)) {
+                timeToAnswer = parseInt(timeoutSelect.value).toFixed(2);
+            }
+
+            consecutiveTimeouts++; // Increment the timeout counter
+
+            if (consecutiveTimeouts >= 3) {
+                // Stop the process after 3 consecutive timeouts
+                stopProcessAfterTimeouts();
+                return; // Exit the function to stop further processing
+            }
+
+            wrongAnswers++;
+            wrongCount.textContent = `Wrong: ${wrongAnswers}`;
+            feedback.textContent = `${correctAnswer}`;
+            feedback.className = 'feedback wrong';
+            answerInput.style.backgroundColor = '#ffcccc'; // pastel red
+            // Re-add the same question to the front of the queue
+            questionsQueue.unshift(currentQuestionGlobal);
+            summaryData.push({
+                question: `${currentQuestionGlobal.table} x ${currentQuestionGlobal.multiplier}`,
+                userAnswer: userAnswer || 'No Answer',
+                correctAnswer: correctAnswer,
+                timeTaken: parseInt(timeoutSelect.value).toFixed(2),
+                isCorrect: false
+            });
+            wrongSound.currentTime = 0;
+            wrongSound.play();
+        } else {
+            // Handle normal (non-timeout) answers
+            consecutiveTimeouts = 0; // Reset the timeout counter on a valid answer
+
+            if (!userAnswer || parseInt(userAnswer) !== correctAnswer) {
+                wrongAnswers++;
+                wrongCount.textContent = `Wrong: ${wrongAnswers}`;
+                feedback.textContent = `${correctAnswer}`;
+                feedback.className = 'feedback wrong';
+                answerInput.style.backgroundColor = '#ffcccc'; // pastel red
+                questionsQueue.unshift(currentQuestionGlobal);
+                summaryData.push({
+                    question: `${currentQuestionGlobal.table} x ${currentQuestionGlobal.multiplier}`,
+                    userAnswer: userAnswer || 'No Answer',
+                    correctAnswer: correctAnswer,
+                    timeTaken: timeToAnswer,
+                    isCorrect: false
+                });
+                wrongSound.currentTime = 0;
+                wrongSound.play();
+            } else {
+                correctAnswers++;
+                correctCount.textContent = `Correct: ${correctAnswers}`;
+                answerInput.style.backgroundColor = '#d4edda'; // light green
+                answerInput.style.color = 'darkgreen';
+                feedback.textContent = '🐹';
+                feedback.className = 'feedback correct';
+                summaryData.push({
+                    question: `${currentQuestionGlobal.table} x ${currentQuestionGlobal.multiplier}`,
+                    userAnswer: userAnswer,
+                    correctAnswer: correctAnswer,
+                    timeTaken: timeToAnswer,
+                    isCorrect: true
+                });
+                correctSound.currentTime = 0;
+                correctSound.play();
+            }
+        }
+
+        setTimeout(askNextQuestion, 3000); // Wait 3 seconds before asking next question
+    }
+
+    function stopProcessAfterTimeouts() {
+        quizSection.style.display = 'none'; // Hide the quiz section
+        alert("You've timed out on the last 3 questions. The quiz will stop now."); // Show an alert message
+        summarySection.style.display = 'block'; // Optionally show the summary
+    }
+
+    function showSummary() {
+        quizSection.style.display = 'none';
+        summarySection.style.display = 'block';
+
+        summaryBody.innerHTML = ''; // Clear previous summary if any
+
+        let totalTime = 0;
+        summaryData.forEach(entry => {
+            let tr = document.createElement('tr');
+
+            let tdQuestion = document.createElement('td');
+            tdQuestion.textContent = entry.question;
+            tr.appendChild(tdQuestion);
+
+            let tdUser = document.createElement('td');
+            tdUser.textContent = entry.userAnswer;
+            tdUser.className = entry.isCorrect ? 'right' : 'wrong';
+            tr.appendChild(tdUser);
+
+            let tdCorrect = document.createElement('td');
+            tdCorrect.textContent = entry.correctAnswer;
+            tr.appendChild(tdCorrect);
+
+            let tdTime = document.createElement('td');
+            tdTime.textContent = entry.timeTaken;
+            tr.appendChild(tdTime);
+
+            summaryBody.appendChild(tr);
+
+            totalTime += parseFloat(entry.timeTaken);
+        });
+
+        const averageTimeValue = (totalTime / summaryData.length).toFixed(2);
+
+        finalScore.textContent = `You got ${correctAnswers} out of ${summaryData.length} correct!`;
+        averageTime.textContent = `Average Time per Question: ${averageTimeValue} seconds`;
+    }
+
+    function shuffleArray(array) {
+        // Fisher-Yates shuffle
+        for (let i = array.length -1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i+1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+</script>
+
+</body>
+</html>
