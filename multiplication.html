@@ -278,7 +278,7 @@
     startBtn.addEventListener('click', startQuiz);
     restartBtn.addEventListener('click', restartQuiz);
     answerInput.addEventListener('keyup', handleAnswerSubmit);
-    answerInput.addEventListener('input', handleTyping);
+    //answerInput.addEventListener('input', handleTyping);
 
     function startQuiz() {
         selectedTable = parseInt(tableSelect.value);
@@ -387,42 +387,42 @@
 
     function startTimers() {
         isAnswered = false;
-        timeToAnswerStart = null;
-        timeToAnswerEnd = null;
-        timeToAnswer = 0;
-        timeLeft = timeoutSeconds; // Use a separate variable for countdown
+        timeToAnswerStart = Date.now();
+        timeLeft = timeoutSeconds; // Initialize countdown with timeoutSeconds
         timeLeftSpan.textContent = timeLeft;
     
-        // Start timeout timer
+        // Reset input box color at the start
+        resetInputBox();
+
+        // Start timeout countdown
         timeoutTimer = setInterval(() => {
-            timeLeft--; // Decrease the countdown variable
-            timeLeftSpan.textContent = timeLeft;
-            updateInputBoxColor();
+            timeLeft--; // Decrement the countdown timer
+            timeLeftSpan.textContent = timeLeft; // Update the displayed time
+
+            updateInputBoxColor(timeLeft); // Update the input box color based on time left
 
             if (timeLeft <= 0) {
-                clearInterval(timeoutTimer);
+                clearInterval(timeoutTimer); // Stop timer if time is up
                 if (!isAnswered) {
                     validateAnswer(true); // Trigger timeout validation
                 }
             }
         }, 1000);
-
-        // Record start time for time to answer
-        timeToAnswerStart = Date.now();
     }
 
-    function updateInputBoxColor() {
-        if (timeoutSeconds === 5) {
+    function updateInputBoxColor(timeLeft) {
+        if (timeLeft <= 7 && timeLeft > 5) {
             answerInput.style.backgroundColor = '#ffe5b4'; // pastel orange
-        } else if (timeoutSeconds === 3) {
-            answerInput.style.backgroundColor = '#ffcc80'; // pastel dark orange
-        } else if (timeoutSeconds === 1) {
+        } else if (timeLeft <= 5 && timeLeft > 3) {
+            answerInput.style.backgroundColor = '#ffcc80'; // darker orange
+        } else if (timeLeft <= 3) {
             answerInput.style.backgroundColor = '#ffcccc'; // pastel red
+        } else {
+            answerInput.style.backgroundColor = '#d4edda'; // light green (default)
         }
     }
 
     function resetInputBox() {
-        answerInput.classList.remove('bg-lightgreen', 'bg-orange', 'bg-darkorange', 'bg-red');
         answerInput.style.backgroundColor = '#d4edda'; // light green
         answerInput.style.color = 'black';
     }
@@ -434,58 +434,14 @@
         let userAnswer = userAnswerRaw.replace(/\D/g, ''); // Strip non-numeric chars
         let correctAnswer = currentQuestionGlobal.table * currentQuestionGlobal.multiplier;
 
+        // If the timeout occurred, check if the answer in the input box is correct
         if (isTimeout) {
-            // Handle timeouts
-            timeToAnswer = ((Date.now() - timeToAnswerStart) / 1000).toFixed(2);
-            if (timeToAnswer > parseInt(timeoutSelect.value)) {
-                timeToAnswer = parseInt(timeoutSelect.value).toFixed(2);
-            }
+            timeToAnswer = parseInt(timeoutSelect.value).toFixed(2);
 
-            consecutiveTimeouts++; // Increment the timeout counter
-
-            if (consecutiveTimeouts >= 3) {
-                // Stop the process after 3 consecutive timeouts
-                stopProcessAfterTimeouts();
-                return; // Exit the function to stop further processing
-            }
-
-            wrongAnswers++;
-            wrongCount.textContent = `Wrong: ${wrongAnswers}`;
-            feedback.textContent = `${correctAnswer}`;
-            feedback.className = 'feedback wrong';
-            answerInput.style.backgroundColor = '#ffcccc'; // pastel red
-            // Re-add the same question to the front of the queue
-            questionsQueue.unshift(currentQuestionGlobal);
-            summaryData.push({
-                question: `${currentQuestionGlobal.table} x ${currentQuestionGlobal.multiplier}`,
-                userAnswer: userAnswer || 'No Answer',
-                correctAnswer: correctAnswer,
-                timeTaken: parseInt(timeoutSelect.value).toFixed(2),
-                isCorrect: false
-            });
-            wrongSound.currentTime = 0;
-            wrongSound.play();
-        } else {
-            // Handle normal (non-timeout) answers
-            consecutiveTimeouts = 0; // Reset the timeout counter on a valid answer
-
-            if (!userAnswer || parseInt(userAnswer) !== correctAnswer) {
-                wrongAnswers++;
-                wrongCount.textContent = `Wrong: ${wrongAnswers}`;
-                feedback.textContent = `${correctAnswer}`;
-                feedback.className = 'feedback wrong';
-                answerInput.style.backgroundColor = '#ffcccc'; // pastel red
-                questionsQueue.unshift(currentQuestionGlobal);
-                summaryData.push({
-                    question: `${currentQuestionGlobal.table} x ${currentQuestionGlobal.multiplier}`,
-                    userAnswer: userAnswer || 'No Answer',
-                    correctAnswer: correctAnswer,
-                    timeTaken: timeToAnswer,
-                    isCorrect: false
-                });
-                wrongSound.currentTime = 0;
-                wrongSound.play();
-            } else {
+            // If the answer is correct when the timeout happens
+            if (parseInt(userAnswer) === correctAnswer) {
+                // Treat it as a correct answer
+                consecutiveTimeouts = 0; // Reset the timeout counter
                 correctAnswers++;
                 correctCount.textContent = `Correct: ${correctAnswers}`;
                 answerInput.style.backgroundColor = '#d4edda'; // light green
@@ -501,10 +457,60 @@
                 });
                 correctSound.currentTime = 0;
                 correctSound.play();
+                setTimeout(askNextQuestion, 3000); // Wait 3 seconds before asking next question
+                return; // Exit early since it's correct
+            } else {
+                // If the answer is incorrect when the timeout happens
+                consecutiveTimeouts++; // Increment the timeout counter
+
+                if (consecutiveTimeouts >= 3) {
+                    stopProcessAfterTimeouts();
+                    return; // Exit the function to stop further processing
+                }
             }
+        } else {
+            // User pressed Enter, calculate the time taken
+            timeToAnswer = ((Date.now() - timeToAnswerStart) / 1000).toFixed(2);
+            consecutiveTimeouts = 0; // Reset the timeout counter on a valid answer
         }
 
-        setTimeout(askNextQuestion, 3000); // Wait 3 seconds before asking next question
+        // Handle incorrect or no answer
+        if (!userAnswer || parseInt(userAnswer) !== correctAnswer) {
+            wrongAnswers++;
+            wrongCount.textContent = `Wrong: ${wrongAnswers}`;
+            feedback.textContent = `${correctAnswer}`;
+            feedback.className = 'feedback wrong';
+            answerInput.style.backgroundColor = '#ffcccc'; // pastel red
+            questionsQueue.unshift(currentQuestionGlobal);
+            summaryData.push({
+                question: `${currentQuestionGlobal.table} x ${currentQuestionGlobal.multiplier}`,
+                userAnswer: userAnswer || 'No Answer',
+                correctAnswer: correctAnswer,
+                timeTaken: timeToAnswer,
+                isCorrect: false
+            });
+            wrongSound.currentTime = 0;
+            wrongSound.play();
+        } else {
+            // If the answer is correct when the user pressed Enter
+            correctAnswers++;
+            correctCount.textContent = `Correct: ${correctAnswers}`;
+            answerInput.style.backgroundColor = '#d4edda'; // light green
+            answerInput.style.color = 'darkgreen';
+            feedback.textContent = '🐹';
+            feedback.className = 'feedback correct';
+            summaryData.push({
+                question: `${currentQuestionGlobal.table} x ${currentQuestionGlobal.multiplier}`,
+                userAnswer: userAnswer,
+                correctAnswer: correctAnswer,
+                timeTaken: timeToAnswer,
+                isCorrect: true
+            });
+            correctSound.currentTime = 0;
+            correctSound.play();
+        }
+
+        setTimeout(askNextQuestion, 3000); // Wait 3 seconds before asking the next question
     }
 
     function stopProcessAfterTimeouts() {
