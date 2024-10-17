@@ -180,8 +180,16 @@
                 <option value="9">9</option>
                 <option value="10">10</option>
             </select>
+            <label for="questions-select" style="margin-left: 15px;">Questions:</label>
+            <select id="questions-select">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20" selected>20</option>
+            </select>
         </div>
         <button id="start-btn">Start</button>
+
     </div>
 
     <div class="quiz-section" id="quiz-section">
@@ -247,6 +255,7 @@
     let isAnswered = false;
     let currentQuestionGlobal = null;
     let consecutiveTimeouts = 0; // Track consecutive timeouts
+    let numQuestions = 20; // Default number of questions
 
     const startBtn = document.getElementById('start-btn');
     const restartBtn = document.getElementById('restart-btn');
@@ -278,6 +287,7 @@
             return;
         }
         timeoutSeconds = parseInt(timeoutSelect.value);
+        numQuestions = parseInt(document.getElementById('questions-select').value); // Get the selected number of questions
         mainTitle.textContent = `Table ${selectedTable}`;
         generateInitialQuestions();
         startSection.style.display = 'none';
@@ -312,7 +322,7 @@
         multipliers = shuffleArray(multipliers);
         // Create 20 questions by cycling through shuffled multipliers
         let i = 0;
-        while (questionsQueue.length < 5) { // # questions
+        while (questionsQueue.length < numQuestions) { // # questions
             questionsQueue.push({ table: selectedTable, multiplier: multipliers[i % multipliers.length] });
             i++;
         }
