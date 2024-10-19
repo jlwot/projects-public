@@ -274,6 +274,10 @@
     const summaryBody = document.getElementById('summary-body');
     const finalScore = document.getElementById('final-score');
     const averageTime = document.getElementById('average-time');
+    
+    const emojiList = ['👍', '😀', '😎', '😻', '🐹', '🐼', '🐷', '🐶', '🦊', '🦄'];
+    let consecutiveCorrectAnswers = 0; // Track consecutive correct answers
+
 
     startBtn.addEventListener('click', startQuiz);
     restartBtn.addEventListener('click', restartQuiz);
@@ -293,6 +297,7 @@
         startSection.style.display = 'none';
         quizSection.style.display = 'block';
         askNextQuestion();
+        answerInput.focus();
     }
 
     function restartQuiz() {
@@ -314,10 +319,12 @@
         quizSection.style.display = 'none';
         summarySection.style.display = 'none';
         startSection.style.display = 'block';
+        consecutiveCorrectAnswers = 0;
+        answerInput.focus();
     }
 
     function generateInitialQuestions() {
-        let multipliers = [2,3,4,5,6,7,8,9];
+        let multipliers = [3,4,5,6,7,8,9];
         // Shuffle multipliers
         multipliers = shuffleArray(multipliers);
         // Create 20 questions by cycling through shuffled multipliers
@@ -438,79 +445,66 @@
         if (isTimeout) {
             timeToAnswer = parseInt(timeoutSelect.value).toFixed(2);
 
-            // If the answer is correct when the timeout happens
             if (parseInt(userAnswer) === correctAnswer) {
-                // Treat it as a correct answer
-                consecutiveTimeouts = 0; // Reset the timeout counter
-                correctAnswers++;
-                correctCount.textContent = `Correct: ${correctAnswers}`;
-                answerInput.style.backgroundColor = '#d4edda'; // light green
-                answerInput.style.color = 'darkgreen';
-                feedback.textContent = '🐹';
-                feedback.className = 'feedback correct';
-                summaryData.push({
-                    question: `${currentQuestionGlobal.table} x ${currentQuestionGlobal.multiplier}`,
-                    userAnswer: userAnswer,
-                    correctAnswer: correctAnswer,
-                    timeTaken: timeToAnswer,
-                    isCorrect: true
-                });
-                correctSound.currentTime = 0;
-                correctSound.play();
-                setTimeout(askNextQuestion, 3000); // Wait 3 seconds before asking next question
+                handleCorrectAnswer(userAnswer, correctAnswer);
                 return; // Exit early since it's correct
             } else {
-                // If the answer is incorrect when the timeout happens
-                consecutiveTimeouts++; // Increment the timeout counter
-
-                if (consecutiveTimeouts >= 3) {
-                    stopProcessAfterTimeouts();
-                    return; // Exit the function to stop further processing
-                }
+                handleWrongAnswer(correctAnswer);
             }
         } else {
-            // User pressed Enter, calculate the time taken
             timeToAnswer = ((Date.now() - timeToAnswerStart) / 1000).toFixed(2);
             consecutiveTimeouts = 0; // Reset the timeout counter on a valid answer
         }
 
-        // Handle incorrect or no answer
         if (!userAnswer || parseInt(userAnswer) !== correctAnswer) {
-            wrongAnswers++;
-            wrongCount.textContent = `Wrong: ${wrongAnswers}`;
-            feedback.textContent = `${correctAnswer}`;
-            feedback.className = 'feedback wrong';
-            answerInput.style.backgroundColor = '#ffcccc'; // pastel red
-            questionsQueue.unshift(currentQuestionGlobal);
-            summaryData.push({
-                question: `${currentQuestionGlobal.table} x ${currentQuestionGlobal.multiplier}`,
-                userAnswer: userAnswer || 'No Answer',
-                correctAnswer: correctAnswer,
-                timeTaken: timeToAnswer,
-                isCorrect: false
-            });
-            wrongSound.currentTime = 0;
-            wrongSound.play();
+            handleWrongAnswer(correctAnswer);
         } else {
-            // If the answer is correct when the user pressed Enter
-            correctAnswers++;
-            correctCount.textContent = `Correct: ${correctAnswers}`;
-            answerInput.style.backgroundColor = '#d4edda'; // light green
-            answerInput.style.color = 'darkgreen';
-            feedback.textContent = '🐹';
-            feedback.className = 'feedback correct';
-            summaryData.push({
-                question: `${currentQuestionGlobal.table} x ${currentQuestionGlobal.multiplier}`,
-                userAnswer: userAnswer,
-                correctAnswer: correctAnswer,
-                timeTaken: timeToAnswer,
-                isCorrect: true
-            });
-            correctSound.currentTime = 0;
-            correctSound.play();
+            handleCorrectAnswer(userAnswer, correctAnswer);
         }
 
         setTimeout(askNextQuestion, 3000); // Wait 3 seconds before asking the next question
+    }
+
+    function handleCorrectAnswer(userAnswer, correctAnswer) {
+        consecutiveTimeouts = 0; // Reset the timeout counter
+        correctAnswers++;
+        consecutiveCorrectAnswers++; // Increase the consecutive correct counter
+
+        // Choose the emoji based on consecutive correct answers
+        let emoji = emojiList[(consecutiveCorrectAnswers - 1) % emojiList.length];
+        correctCount.textContent = `Correct: ${correctAnswers}`;
+        answerInput.style.backgroundColor = '#d4edda'; // light green
+        answerInput.style.color = 'darkgreen';
+        feedback.textContent = emoji; // Display the appropriate emoji
+        feedback.className = 'feedback correct';
+        summaryData.push({
+            question: `${currentQuestionGlobal.table} x ${currentQuestionGlobal.multiplier}`,
+            userAnswer: userAnswer,
+            correctAnswer: correctAnswer,
+            timeTaken: timeToAnswer,
+            isCorrect: true
+        });
+        correctSound.currentTime = 0;
+        correctSound.play();
+    }
+
+    function handleWrongAnswer(correctAnswer) {
+        consecutiveCorrectAnswers = 0; // Reset the consecutive correct answers
+        wrongAnswers++;
+        wrongCount.textContent = `Wrong: ${wrongAnswers}`;
+        feedback.textContent = `${correctAnswer}`;
+        feedback.className = 'feedback wrong';
+        answerInput.style.backgroundColor = '#ffcccc'; // pastel red
+        questionsQueue.unshift(currentQuestionGlobal);
+        summaryData.push({
+            question: `${currentQuestionGlobal.table} x ${currentQuestionGlobal.multiplier}`,
+            userAnswer: 'No Answer',
+            correctAnswer: correctAnswer,
+            timeTaken: timeToAnswer,
+            isCorrect: false
+        });
+        wrongSound.currentTime = 0;
+        wrongSound.play();
     }
 
     function stopProcessAfterTimeouts() {
