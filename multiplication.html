@@ -341,7 +341,6 @@
     }
 
     function askNextQuestion() {
-        alert("1");
         if (questionsQueue.length === 0) {
             // All questions answered correctly
             showSummary();
@@ -465,7 +464,6 @@
         }
         */
         
-        alert("33");
         setTimeout(askNextQuestion, 3000); // Wait 3 seconds before asking the next question
     }
 
@@ -490,7 +488,6 @@
         });
         correctSound.currentTime = 0;
         correctSound.play();
-        alert("222");
     }
 
     function handleWrongAnswer(correctAnswer) {
