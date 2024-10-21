@@ -8,7 +8,7 @@
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
-            padding: 10px;
+            padding: 7px;
         }
         .container {
             max-width: 900px;
@@ -195,7 +195,7 @@
     <div class="quiz-section" id="quiz-section">
         <div class="question-container">
             <div class="question" id="question-display">Question goes here</div>
-            <input type="text" id="answer-input" class="answer-box" autocomplete="off">
+            <input type="tel" id="answer-input" class="answer-box" autocomplete="off">
             <div class="feedback" id="feedback"></div>
         </div>
         <div id="timer-container">
@@ -341,6 +341,7 @@
     }
 
     function askNextQuestion() {
+        alert("1");
         if (questionsQueue.length === 0) {
             // All questions answered correctly
             showSummary();
@@ -447,7 +448,7 @@
 
             if (parseInt(userAnswer) === correctAnswer) {
                 handleCorrectAnswer(userAnswer, correctAnswer);
-                return; // Exit early since it's correct
+                //return; // Exit early since it's correct
             } else {
                 handleWrongAnswer(correctAnswer);
             }
@@ -456,12 +457,15 @@
             consecutiveTimeouts = 0; // Reset the timeout counter on a valid answer
         }
 
+        /*
         if (!userAnswer || parseInt(userAnswer) !== correctAnswer) {
             handleWrongAnswer(correctAnswer);
         } else {
             handleCorrectAnswer(userAnswer, correctAnswer);
         }
-
+        */
+        
+        alert("33");
         setTimeout(askNextQuestion, 3000); // Wait 3 seconds before asking the next question
     }
 
@@ -486,6 +490,7 @@
         });
         correctSound.currentTime = 0;
         correctSound.play();
+        alert("222");
     }
 
     function handleWrongAnswer(correctAnswer) {
