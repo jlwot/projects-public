@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mastermind Game</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 10px;
+      background: #f0f0f0;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    #game {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    }
+    /* Guess history row: guessed pegs + feedback */
+    #guess-history .guess-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    /* Container for guessed pegs arranged horizontally */
+    .guess-pegs {
+      display: flex;
+    }
+    .peg {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #ccc;
+      margin: 0 4px;
+      border: 1px solid #999;
+    }
+    /* Feedback pegs arranged in a grid (square pattern) */
+    .feedback {
+      display: grid;
+      grid-template-columns: repeat(2, auto);
+      grid-gap: 2px;
+      width: 30px;
+    }
+    .feedback .small-peg {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ddd;
+      border: 1px solid #aaa;
+    }
+    #color-buttons {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0;
+      flex-wrap: wrap;
+    }
+    #color-buttons button {
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 50%;
+      margin: 5px;
+      outline: none;
+      cursor: pointer;
+    }
+    /* Current guess row displayed horizontally */
+    #current-guess {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0;
+    }
+    #current-guess .peg {
+      cursor: pointer;
+    }
+    #controls {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    #controls button {
+      margin: 5px;
+      padding: 8px 12px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #message {
+      text-align: center;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <h1>Mastermind</h1>
+    <!-- Guess history will appear here (new guesses show just above the current guess) -->
+    <div id="guess-history"></div>
+    
+    <!-- Current guess row -->
+    <div id="current-guess"></div>
+    
+    <div id="controls">
+      <button id="submit-btn" disabled>Submit Guess</button>
+      <button id="clear-btn">Clear Guess</button>
+    </div>
+    
+    <div id="color-buttons"></div>
+    <div id="message"></div>
+  </div>
+
+  <script>
+    const colors = ["red", "blue", "green", "yellow", "orange", "purple"];
+    let secretCode = [];
+    let currentGuess = [];
+    const maxPegs = 4;
+    let gameOver = false;
+
+    const guessHistoryDiv = document.getElementById("guess-history");
+    const currentGuessDiv = document.getElementById("current-guess");
+    const colorButtonsDiv = document.getElementById("color-buttons");
+    const submitBtn = document.getElementById("submit-btn");
+    const clearBtn = document.getElementById("clear-btn");
+    const messageDiv = document.getElementById("message");
+
+    // Initialize the game (secret code, clear guess history, etc.)
+    function initGame() {
+      secretCode = [];
+      for (let i = 0; i < maxPegs; i++) {
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        secretCode.push(randomColor);
+      }
+      console.log("Secret Code:", secretCode); // For debugging; remove in production
+      currentGuess = [];
+      gameOver = false;
+      guessHistoryDiv.innerHTML = "";
+      currentGuessDiv.innerHTML = "";
+      messageDiv.textContent = "";
+      submitBtn.disabled = true;
+      drawCurrentGuess();
+    }
+
+    // Draw the current guess row (empty or with selected colors)
+    function drawCurrentGuess() {
+      currentGuessDiv.innerHTML = "";
+      for (let i = 0; i < maxPegs; i++) {
+        const peg = document.createElement("div");
+        peg.classList.add("peg");
+        peg.style.background = currentGuess[i] ? currentGuess[i] : "#ccc";
+        // Click a peg to remove that color from the guess
+        peg.addEventListener("click", () => {
+          if (currentGuess[i]) {
+            currentGuess.splice(i, 1);
+            drawCurrentGuess();
+            updateSubmitButton();
+          }
+        });
+        currentGuessDiv.appendChild(peg);
+      }
+    }
+
+    // Enable submit button if the current guess has 4 colors
+    function updateSubmitButton() {
+      submitBtn.disabled = (currentGuess.length !== maxPegs);
+    }
+
+    // Create color selection buttons
+    function drawColorButtons() {
+      colorButtonsDiv.innerHTML = "";
+      colors.forEach(color => {
+        const btn = document.createElement("button");
+        btn.style.background = color;
+        btn.addEventListener("click", () => {
+          if (gameOver) return;
+          if (currentGuess.length < maxPegs) {
+            currentGuess.push(color);
+            drawCurrentGuess();
+            updateSubmitButton();
+          }
+        });
+        colorButtonsDiv.appendChild(btn);
+      });
+    }
+
+    // When the user submits a guess
+    function submitGuess() {
+      if (currentGuess.length !== maxPegs) return;
+      const guess = currentGuess.slice();
+
+      // Calculate feedback
+      let correctPosition = 0;
+      let correctColor = 0;
+      let secretCodeCopy = secretCode.slice();
+      let guessCopy = guess.slice();
+
+      // First pass: correct color and position
+      for (let i = 0; i < maxPegs; i++) {
+        if (guessCopy[i] === secretCodeCopy[i]) {
+          correctPosition++;
+          secretCodeCopy[i] = null;
+          guessCopy[i] = null;
+        }
+      }
+      // Second pass: correct color in wrong position
+      for (let i = 0; i < maxPegs; i++) {
+        if (guessCopy[i]) {
+          const index = secretCodeCopy.indexOf(guessCopy[i]);
+          if (index !== -1) {
+            correctColor++;
+            secretCodeCopy[index] = null;
+          }
+        }
+      }
+
+      addGuessToHistory(guess, correctPosition, correctColor);
+
+      if (correctPosition === maxPegs) {
+        messageDiv.textContent = "Congratulations! You've cracked the code!";
+        gameOver = true;
+      } else {
+        currentGuess = [];
+        drawCurrentGuess();
+        updateSubmitButton();
+      }
+    }
+
+    // Append the guess and its feedback to the history (displayed just above the current guess)
+    function addGuessToHistory(guess, correctPosition, correctColor) {
+      const row = document.createElement("div");
+      row.classList.add("guess-row");
+
+      // Container for the guessed pegs arranged in a row
+      const guessDiv = document.createElement("div");
+      guessDiv.classList.add("guess-pegs");
+      guess.forEach(color => {
+        const peg = document.createElement("div");
+        peg.classList.add("peg");
+        peg.style.background = color;
+        guessDiv.appendChild(peg);
+      });
+      row.appendChild(guessDiv);
+
+      // Feedback container arranged in a square grid
+      const feedbackDiv = document.createElement("div");
+      feedbackDiv.classList.add("feedback");
+
+      // Black pegs for correct positions
+      for (let i = 0; i < correctPosition; i++) {
+        const smallPeg = document.createElement("div");
+        smallPeg.classList.add("small-peg");
+        smallPeg.style.background = "black";
+        feedbackDiv.appendChild(smallPeg);
+      }
+      // White pegs for correct colors in wrong positions
+      for (let i = 0; i < correctColor; i++) {
+        const smallPeg = document.createElement("div");
+        smallPeg.classList.add("small-peg");
+        smallPeg.style.background = "white";
+        feedbackDiv.appendChild(smallPeg);
+      }
+
+      row.appendChild(feedbackDiv);
+      // Append new guess row so it appears just above the current guess row
+      guessHistoryDiv.appendChild(row);
+    }
+
+    // Clear the current guess (without resetting the entire game)
+    function clearGuess() {
+      currentGuess = [];
+      drawCurrentGuess();
+      updateSubmitButton();
+    }
+
+    // Event listeners for buttons
+    submitBtn.addEventListener("click", submitGuess);
+    clearBtn.addEventListener("click", clearGuess);
+
+    // Start the game
+    drawColorButtons();
+    initGame();
+  </script>
+</body>
+</html>
