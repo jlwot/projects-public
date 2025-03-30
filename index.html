@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Webapp Hub</title> <style>
+        /* Core styles from the provided example */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 7px;
+            margin: 0; /* Added for consistency */
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto; /* Added more vertical margin */
+            padding: 30px;     /* Slightly more padding */
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+        h1, h3 {
+            text-align: center;
+            color: #333; /* Added default text color */
+        }
+        h3 {
+            color: #555; /* Lighter color for subtitle */
+            margin-bottom: 40px; /* Space below subtitle */
+        }
+
+        /* Styling for the App Links List */
+        .app-list {
+            list-style: none; /* Remove default bullet points */
+            padding: 0;
+            margin: 0;
+        }
+        .app-list li {
+            margin-bottom: 20px; /* Space between links */
+            text-align: center; /* Center the links */
+        }
+        .app-list a {
+            display: inline-block; /* Treat links like buttons */
+            padding: 12px 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: white;
+            background-color: #4CAF50; /* Green button style from example */
+            border: none;
+            border-radius: 5px;
+            text-decoration: none; /* Remove underline */
+            cursor: pointer;
+            transition: background-color 0.3s;
+            min-width: 250px; /* Give buttons a consistent minimum width */
+        }
+        .app-list a:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+
+        /* Unused styles from the original example (can be removed or kept) */
+        /*
+        .start-section, .quiz-section, .summary-section { margin-top: 20px; }
+        .start-section select, .start-section button { width: 100%; padding: 10px; font-size: 1em; border-radius: 5px; border: 1px solid #ccc; margin-bottom: 15px; }
+        .timeout-container { display: flex; align-items: center; justify-content: center; margin-bottom: 15px; }
+        .timeout-container label { margin-right: 10px; font-size: 0.9em; color: #555; }
+        .quiz-section { display: none; }
+        .question-container { display: flex; align-items: center; justify-content: center; margin: 30px 0; }
+        .question { font-size: 2em; margin-right: 10px; }
+        .answer-box { width: 80px; height: 50px; font-size: 1.5em; text-align: center; border-radius: 5px; border: 2px solid #ccc; margin-right: 20px; transition: background-color 0.5s, color 0.5s; }
+        .feedback { font-size: 3em; margin-left: 20px; font-weight: bold; }
+        .correct { color: darkgreen; }
+        .wrong { color: red; }
+        .summary-section { display: none; }
+        .summary-section table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .summary-section table th, .summary-section table td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        .summary-section .right { color: green; font-weight: bold; }
+        .summary-section .wrong { color: red; font-weight: bold; }
+        #start-btn, #restart-btn { display: block; margin: 20px auto; padding: 10px 20px; font-size: 1.2em; border: none; border-radius: 5px; background-color: #4CAF50; color: white; cursor: pointer; transition: background-color 0.3s; }
+        #start-btn:hover, #restart-btn:hover { background-color: #45a049; }
+        #timer-container { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        #timer { font-size: 1.2em; }
+        .counter { font-size: 1.2em; }
+        .bg-lightgreen { background-color: #d4edda; }
+        .bg-orange { background-color: #ffe5b4; }
+        .bg-darkorange { background-color: #ffcc80; }
+        .bg-red { background-color: #ffcccc; }
+        .timeout-container select { width: 60px; padding: 5px; font-size: 0.9em; border-radius: 5px; border: 1px solid #ccc; }
+        */
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Learning hub</h1>
+    <h3>Local apps:</h3>
+    <ul class="app-list">
+        <li>
+            <a href="multiplication.html">Multiplication</a>
+            </li>
+        <li>
+            <a href="sums.html">Addition</a>
+        </li>
+        <li>
+            <a href="mastermind.html">Mastermind</a>
+        </li>
+    </ul>
+</div>
+
+</body>
+</html>
