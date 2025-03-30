@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Addition Strategy Practice</title>
+    <style>
+/* Base Styles (Keep previous styles) */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #eef2f7; /* Light grayish-blue background */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align top */
+    min-height: 100vh;
+    padding: 20px 10px; /* Adjust padding for mobile */
+    margin: 0;
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.container {
+    background-color: #ffffff;
+    padding: 20px; /* Adjust padding */
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 100%; /* Use full width */
+    max-width: 700px;
+    box-sizing: border-box;
+}
+
+h1 {
+    color: #337ab7;
+    margin-bottom: 10px;
+    font-size: 1.8em; /* Adjust font size */
+}
+h2 {
+     color: #337ab7;
+     margin-bottom: 15px;
+     font-size: 1.5em;
+}
+h3 {
+    color: #555;
+    margin-top: 25px;
+    margin-bottom: 10px;
+    text-align: left;
+    font-size: 1.1em;
+}
+
+p {
+    color: #666;
+    margin-bottom: 25px;
+    font-size: 0.95em;
+}
+
+/* --- Setup Screen --- */
+.settings {
+    display: flex;
+    /* justify-content: space-around; */ /* Changed for better wrapping */
+    justify-content: center; /* Center items when wrapped */
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 25px;
+    gap: 15px 20px; /* Row and column gap */
+}
+
+.setting-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 120px; /* Ensure items have some width */
+}
+
+.setting-item label {
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 8px;
+    font-size: 0.9em;
+}
+
+.setting-item select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    width: 100%; /* Make selects take available width in their item */
+    box-sizing: border-box;
+}
+
+#level-select {
+    min-width: 220px; /* Allow level select to be wider */
+}
+
+
+#start-button {
+    background-color: #5cb85c;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1em; /* Adjust size */
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#start-button:hover {
+    background-color: #4cae4c;
+}
+
+/* --- Training Screen --- */
+.hud {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Vertically align HUD items */
+    margin-bottom: 15px; /* Reduced margin */
+    font-size: 0.9em; /* Adjust size */
+    color: #555;
+    padding: 8px 12px; /* Adjust padding */
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    border: 1px solid #eee;
+    position: relative; /* Needed for absolute positioning of close button */
+}
+
+/* Style for the close button */
+.close-btn {
+    /* position: absolute; */ /* Removed absolute positioning for flex */
+    /* top: 5px; */
+    /* right: 10px; */
+    background: none;
+    border: none;
+    font-size: 1.8em; /* Make X larger */
+    line-height: 1; /* Adjust line height */
+    color: #aaa;
+    cursor: pointer;
+    padding: 0 5px; /* Minimal padding */
+}
+.close-btn:hover {
+    color: #555;
+}
+
+
+#problem-area {
+    margin-top: 15px; /* Reduced margin */
+    padding: 15px 5px; /* Adjust padding */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#problem-text {
+    font-size: 2.5em; /* Adjust size */
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+    word-wrap: break-word; /* Ensure long text doesn't overflow */
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 10px; /* Reduced margin */
+}
+
+#answer-input {
+    width: 45%; /* Adjust width */
+    max-width: 150px; /* Max width */
+    padding: 12px; /* Adjust padding */
+    font-size: 1.6em; /* Adjust size */
+    text-align: center;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    -moz-appearance: textfield;
+    margin: 0;
+}
+#answer-input::-webkit-outer-spin-button,
+#answer-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+#answer-input:focus {
+     outline: none;
+    border-color: #337ab7;
+    box-shadow: 0 0 5px rgba(51, 122, 183, 0.5);
+}
+
+.input-feedback {
+    display: flex;
+    align-items: center;
+    min-width: 80px; /* Adjust min-width */
+    margin-left: 10px; /* Adjust margin */
+    height: 45px; /* Adjust height */
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+#emoji-display {
+    font-size: 1.8em; /* Adjust size */
+    display: inline-block;
+    animation: pop 0.3s ease-out;
+    width: 30px; /* Give fixed width */
+    text-align: center;
+}
+
+#correction-display {
+    font-size: 0.9em; /* Adjust size */
+    font-weight: bold;
+    color: #d9534f;
+    margin-left: 5px; /* Adjust margin */
+    white-space: nowrap; /* Prevent wrapping */
+}
+
+#feedback {
+    margin-top: 5px;
+    font-size: 1em; /* Adjust size */
+    font-weight: bold;
+    min-height: 20px;
+    width: 100%;
+    text-align: center;
+}
+
+#feedback.correct { color: #5cb85c; }
+#feedback.incorrect { color: #d9534f; }
+
+#timer { font-weight: bold; padding: 5px 8px; border-radius: 3px; font-size: 0.9em; }
+#timer.warning { background-color: #f0ad4e; color: white; }
+#timer.critical { background-color: #d9534f; color: white; animation: pulse 1s infinite; }
+
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
+
+/* --- Results Screen --- */
+#results-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+    text-align: left;
+    max-height: 300px; /* Adjust height */
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+#results-list li {
+    padding: 10px 12px; /* Adjust padding */
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping */
+    gap: 5px 10px; /* Add gap */
+    font-size: 0.9em; /* Adjust size */
+}
+#results-list li:last-child { border-bottom: none; }
+
+#results-list .problem { font-weight: bold; color: #333; flex-grow: 1; margin-right: 10px; }
+#results-list .user-answer { font-style: italic; white-space: nowrap; }
+#results-list .user-answer.correct { color: #5cb85c; font-weight: bold; }
+#results-list .user-answer.incorrect { color: #d9534f; font-weight: bold; text-decoration: line-through; }
+#results-list .correct-answer { font-weight: bold; color: #444; margin-left: 5px; white-space: nowrap; }
+
+.result-buttons { margin-top: 15px; }
+.result-buttons button { padding: 10px 15px; font-size: 0.95em; cursor: pointer; border-radius: 5px; border: none; color: white; margin: 5px; transition: background-color 0.3s ease; }
+#restart-button { background-color: #5bc0de; }
+#restart-button:hover { background-color: #31b0d5; }
+#new-game-button { background-color: #777; }
+#new-game-button:hover { background-color: #666; }
+
+/* --- Utility --- */
+.hidden { display: none; }
+
+/* --- Media Queries for Mobile Responsiveness --- */
+
+/* Smaller screens (e.g., phones) */
+@media (max-width: 600px) {
+    body {
+        padding-top: 10px; /* Less top padding */
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    .container {
+        padding: 15px;
+    }
+    h1 { font-size: 1.6em; }
+    h2 { font-size: 1.3em; }
+    h3 { font-size: 1.0em; margin-top: 20px; }
+    p { font-size: 0.9em; margin-bottom: 20px; }
+
+    .settings {
+        gap: 10px; /* Reduce gap */
+        margin-bottom: 20px;
+    }
+    .setting-item select {
+        font-size: 0.95em;
+        padding: 6px 10px;
+    }
+     #level-select {
+        min-width: 180px; /* Adjust width */
+    }
+
+    #start-button {
+        font-size: 1em;
+        padding: 10px 20px;
+    }
+
+    .hud {
+        font-size: 0.8em;
+        padding: 6px 10px;
+        margin-bottom: 10px;
+    }
+     .close-btn {
+        font-size: 1.6em;
+    }
+
+    #problem-text {
+        font-size: 2.0em; /* Smaller problem text */
+        margin-bottom: 15px;
+    }
+    #answer-input {
+        width: 55%; /* Slightly wider on mobile */
+        padding: 10px;
+        font-size: 1.4em;
+    }
+    .input-feedback {
+        min-width: 60px;
+        margin-left: 8px;
+        height: 40px;
+    }
+     #emoji-display {
+        font-size: 1.6em;
+         width: 25px;
+    }
+    #correction-display {
+        font-size: 0.8em;
+    }
+     #feedback {
+        font-size: 0.9em;
+        min-height: 18px;
+    }
+
+    #results-list li {
+        font-size: 0.85em;
+        padding: 8px 10px;
+    }
+    .result-buttons button {
+        font-size: 0.9em;
+        padding: 8px 12px;
+    }
+}
+
+/* Even smaller screens */
+@media (max-width: 400px) {
+     h1 { font-size: 1.4em; }
+     #problem-text { font-size: 1.8em; }
+     #answer-input { font-size: 1.3em; width: 60%; }
+     .input-feedback { min-width: 50px; margin-left: 5px; }
+     #emoji-display { font-size: 1.4em; width: 20px; }
+     .hud { flex-wrap: wrap; justify-content: space-evenly; gap: 5px; } /* Allow HUD items to wrap */
+     .setting-item { min-width: 100px; } /* Smaller min-width */
+     #level-select { min-width: 150px; }
+}    
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <div id="setup-screen">
+             <h1>Addition Strategy Practice</h1>
+            <p>Select a strategy level and start training!</p>
+            <div class="settings">
+                <div class="setting-item">
+                    <label for="level-select">Focus Level:</label>
+                    <select id="level-select"></select>
+                </div>
+                <div class="setting-item">
+                    <label for="num-questions">Questions:</label>
+                    <select id="num-questions">
+                        <option value="10">10</option>
+                        <option value="15" selected>15</option>
+                        <option value="20">20</option>
+                        <option value="25">25</option>
+                         <option value="30">30</option>
+                    </select>
+                </div>
+                 <div class="setting-item">
+                    <label for="timeout">Timeout (sec):</label>
+                    <select id="timeout">
+                        <option value="0">None</option>
+                        <option value="15">15</option>
+                        <option value="10" selected>10</option>
+                        <option value="7">7</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+            </div>
+            <button id="start-button">Start Training</button>
+        </div>
+
+        <div id="training-screen" class="hidden">
+             <div class="hud">
+                <span id="progress">Question: 1 / 15</span>
+                <span id="score">Score: 0</span>
+                <span id="timer">Time: 10</span>
+                <button id="close-button" class="close-btn" title="Quit Session">&times;</button>
+            </div>
+            <div id="problem-area">
+                <div id="problem-text">18 + 5 = ?</div>
+                 <div class="input-wrapper">
+                    <input type="number" id="answer-input" pattern="\d*" inputmode="numeric" autocomplete="off">
+                    <span class="input-feedback">
+                         <span id="emoji-display"></span>
+                         <span id="correction-display"></span>
+                    </span>
+                </div>
+                 <div id="feedback"></div>
+            </div>
+        </div>
+
+        <div id="results-screen" class="hidden">
+             <h2>Session Results</h2>
+            <div id="final-score">Your Score: 12 / 15</div>
+            <h3>Review Your Answers:</h3>
+            <ul id="results-list">
+                </ul>
+            <div class="result-buttons">
+                <button id="restart-button">Train Again</button>
+                <button id="new-game-button">New Game</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- DOM Elements ---
+    const setupScreen = document.getElementById('setup-screen');
+    const trainingScreen = document.getElementById('training-screen');
+    const resultsScreen = document.getElementById('results-screen');
+
+    const levelSelect = document.getElementById('level-select');
+    const numQuestionsSelect = document.getElementById('num-questions');
+    const timeoutSelect = document.getElementById('timeout');
+    const startButton = document.getElementById('start-button');
+
+    const progressText = document.getElementById('progress');
+    const scoreText = document.getElementById('score');
+    const timerText = document.getElementById('timer');
+    const closeButton = document.getElementById('close-button'); // Added close button
+    const problemText = document.getElementById('problem-text');
+    const answerInput = document.getElementById('answer-input');
+    const feedbackText = document.getElementById('feedback'); // General feedback below input
+    const emojiDisplay = document.getElementById('emoji-display'); // Emoji next to input
+    const correctionDisplay = document.getElementById('correction-display'); // Correction next to input
+
+    const finalScoreText = document.getElementById('final-score');
+    const resultsList = document.getElementById('results-list');
+    const restartButton = document.getElementById('restart-button');
+    const newGameButton = document.getElementById('new-game-button');
+
+    // --- Game State ---
+    let currentLevelIndex = 0;
+    let totalQuestions = 15;
+    let timePerQuestion = 10; // 0 for no timeout
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let timerInterval = null;
+    let currentTime = 0;
+    let currentProblem = null;
+    let results = []; // Store { problem: { q: '', a: 0 }, userAnswer: '', isCorrect: bool }
+    let gameActive = false; // Flag to prevent multiple submissions/timeout handling
+
+    // --- Gamification State ---
+    const emojiStreakList = ['🚀', '✨', '🔥', '🎉', '⭐', '💯', '🦄', '🤩'];
+    let currentEmojiIndex = 0;
+
+
+    // --- Levels Definition (Keep the same as before) ---
+     const levels = [
+        { name: "Level 1: Count On (+0, +1, +2)", strategy: 'countOn', minNum: 1, maxNum: 9 },
+        { name: "Level 2: Make 10 (Complements)", strategy: 'make10', minNum: 1, maxNum: 9 },
+        { name: "Level 3: Doubles Facts", strategy: 'doubles', minNum: 1, maxNum: 9 },
+        { name: "Level 4: Near Doubles", strategy: 'nearDoubles', minNum: 2, maxNum: 9 },
+        { name: "Level 5: Bridge Through 10", strategy: 'bridge10', minNum: 5, maxNum: 9 },
+        { name: "Level 6: Add Tens & 100-Complements", strategy: 'addTensComplements', minNum: 10, maxNum: 90 },
+        { name: "Level 7: Make the Next Ten (2-digit+)", strategy: 'makeNextTen', minNum: 11, maxNum: 89 },
+        { name: "Level 8: Add 9 / Near Tens (Compensation)", strategy: 'compensation', minNum: 11, maxNum: 89 },
+        { name: "Level 9: Add by Place Value", strategy: 'placeValue', minNum: 11, maxNum: 89 },
+        { name: "Level 10: Big Complements (Making 100s)", strategy: 'bigComplements', minNum: 11, maxNum: 89 },
+        { name: "Level 11: Flexible Strategies & Multi-Digit", strategy: 'flexible', minNum: 11, maxNum: 999 }
+    ];
+
+    // --- Helper Functions (Keep the same) ---
+    const getRandomInt = (min, max) => { /* ... (keep function) ... */
+        min = Math.ceil(min); max = Math.floor(max);
+        if (min > max) [min, max] = [max, min];
+        if (min === max) return min;
+        if (max < min) return min;
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+     };
+    const shuffleArray = (array) => { /* ... (keep function) ... */
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+     };
+
+    // --- Problem Generation Functions (Keep the same) ---
+    const problemGenerators = { /* ... (keep all 11 generator functions) ... */
+        countOn: () => { const n1=getRandomInt(1,9), n2=getRandomInt(0,2), nums=shuffleArray([n1,n2]); return { q: `${nums[0]} + ${nums[1]}`, a: n1+n2 }; },
+        make10: () => { const n1=getRandomInt(1,9), n2=10-n1, nums=shuffleArray([n1,n2]); return { q: `${nums[0]} + ${nums[1]}`, a: 10 }; },
+        doubles: () => { const n1=getRandomInt(1,9); return { q: `${n1} + ${n1}`, a: n1+n1 }; },
+        nearDoubles: (l) => { const n1=getRandomInt(l.minNum,l.maxNum), d=Math.random()<0.5?1:-1; let n2=n1+d; if(n2<1)n2=n1+1; const nums=shuffleArray([n1,n2]); return { q: `${nums[0]} + ${nums[1]}`, a: n1+n2 }; },
+        bridge10: (l) => { let n1,n2,s; do { n1=getRandomInt(l.minNum,l.maxNum); n2=getRandomInt(l.minNum,l.maxNum); s=n1+n2; } while(s<=10||n1===n2||Math.abs(n1-n2)===1||n1+n2===10); const nums=shuffleArray([n1,n2]); return { q: `${nums[0]} + ${nums[1]}`, a: s }; },
+        addTensComplements: () => { if(Math.random()<0.5){ const n1=getRandomInt(1,8)*10, maxT=Math.floor((90-n1)/10), n2=getRandomInt(1,maxT>0?maxT:1)*10, nums=shuffleArray([n1,n2]); return { q: `${nums[0]} + ${nums[1]}`, a: n1+n2 }; } else { const n1=getRandomInt(1,9)*10, n2=100-n1, nums=shuffleArray([n1,n2]); return { q: `${nums[0]} + ${nums[1]}`, a: 100 }; } },
+        makeNextTen: (l) => { const n1=getRandomInt(l.minNum,l.maxNum), o1=n1%10; let n2; if(o1===0){n2=getRandomInt(1,9);}else{const minN2=10-o1; n2=getRandomInt(minN2,9); if(n2==minN2&&Math.random()<0.5){n2=getRandomInt(minN2+1,9);}} if(n2<1||n2>9)n2=getRandomInt(1,9); return { q: `${n1} + ${n2}`, a: n1+n2 }; },
+        compensation: (l) => { const n1=getRandomInt(l.minNum,l.maxNum), nt=[8,9,11,12,18,19,21,22], n2=nt[getRandomInt(0,nt.length-1)], nums=shuffleArray([n1,n2]); return { q: `${nums[0]} + ${nums[1]}`, a: n1+n2 }; },
+        placeValue: (l) => { const n1=getRandomInt(l.minNum,l.maxNum), n2=getRandomInt(l.minNum,l.maxNum); return { q: `${n1} + ${n2}`, a: n1+n2 }; },
+        bigComplements: (l) => { let n1,n2; do { const min=Math.max(11,l.minNum), max=Math.min(89,l.maxNum); n1 = min>=max ? getRandomInt(11,89) : getRandomInt(min,max); } while(n1%10===0); n2=100-n1; const nums=shuffleArray([n1,n2]); return { q: `${nums[0]} + ${nums[1]}`, a: 100 }; },
+        flexible: (l) => { const nd=Math.random()<0.3?3:2; let n1,n2; if(nd===3){n1=getRandomInt(100,999);n2=getRandomInt(11,999);}else{n1=getRandomInt(l.minNum,99);n2=getRandomInt(l.minNum,99);} const nums=shuffleArray([n1,n2]); return { q: `${nums[0]} + ${nums[1]}`, a: n1+n2 }; }
+    };
+    const generateProblem = (levelIndex) => { /* ... (keep generation logic with 70/30 split) ... */
+        const targetLevel = levels[levelIndex]; if (!targetLevel) { console.error("Invalid level index:", levelIndex); return { q: '1 + 1', a: 2 }; }
+        const targetStrategy = targetLevel.strategy; let generatorKey = targetStrategy;
+        const isReview = levelIndex > 0 && Math.random() < 0.3;
+        if (isReview) { const reviewLevelIndex = getRandomInt(0, levelIndex - 1); if (levels[reviewLevelIndex]) { generatorKey = levels[reviewLevelIndex].strategy; console.log(`Review Problem: Using strategy from Level ${reviewLevelIndex + 1} (${generatorKey})`); } else { console.warn(`Could not find review level at index ${reviewLevelIndex}, using target strategy instead.`); generatorKey = targetStrategy; } } else { console.log(`New Concept Problem: Using strategy for Level ${levelIndex + 1} (${generatorKey})`); }
+        const generator = problemGenerators[generatorKey];
+        if (generator && typeof generator === 'function') { try { let problem = generator(targetLevel); if (typeof problem.q !== 'string' || typeof problem.a !== 'number' || isNaN(problem.a)) { console.error("Generated invalid problem:", problem, "for strategy:", generatorKey); problem = { q: '1 + 1', a: 2}; } return problem; } catch (error) { console.error("Error generating problem for strategy:", generatorKey, error); return { q: '1 + 1', a: 2}; } } else { console.error("Missing or invalid generator for strategy:", generatorKey); const n1 = getRandomInt(1, 10); const n2 = getRandomInt(1, 10); return { q: `${n1} + ${n2}`, a: n1 + n2 }; }
+    };
+
+
+    // --- Game Flow Functions ---
+    const showScreen = (screenId) => {
+        setupScreen.classList.add('hidden');
+        trainingScreen.classList.add('hidden');
+        resultsScreen.classList.add('hidden');
+        const screenToShow = document.getElementById(screenId);
+        if (screenToShow) {
+            screenToShow.classList.remove('hidden');
+        } else {
+            console.error("Screen not found:", screenId);
+        }
+    };
+
+    // *** MODIFIED startTimer Function ***
+    const startTimer = () => {
+        clearInterval(timerInterval);
+        if (timePerQuestion > 0) {
+            currentTime = timePerQuestion;
+            timerText.textContent = `Time: ${currentTime}`;
+            timerText.classList.remove('hidden', 'warning', 'critical');
+
+            timerInterval = setInterval(() => {
+                if (!gameActive) { // Stop timer if game was quit
+                    clearInterval(timerInterval);
+                    return;
+                }
+                currentTime--;
+                timerText.textContent = `Time: ${currentTime}`;
+                timerText.classList.remove('warning', 'critical');
+                if (currentTime <= 5 && currentTime > 2) timerText.classList.add('warning');
+                else if (currentTime <= 2) timerText.classList.add('critical');
+
+                if (currentTime <= 0) {
+                    // Timer expired, handle answer based on current input
+                    clearInterval(timerInterval);
+                    console.log("Timer expired, handling answer.");
+                    handleAnswer(); // Call handleAnswer WITHOUT timeout flag
+                }
+            }, 1000);
+        } else {
+            timerText.classList.add('hidden');
+            timerText.textContent = '';
+        }
+    };
+
+    const displayProblem = () => {
+        if (!gameActive) return; // Don't display if game isn't active
+
+        currentProblem = generateProblem(currentLevelIndex);
+        const questionText = currentProblem && typeof currentProblem.q === 'string' ? currentProblem.q : 'Error';
+        problemText.textContent = `${questionText.replace(' ', '\u00A0')} = ?`;
+
+        answerInput.value = '';
+        answerInput.disabled = false;
+        answerInput.focus();
+        feedbackText.textContent = '';
+        feedbackText.className = '';
+        emojiDisplay.textContent = '';
+        correctionDisplay.textContent = '';
+        progressText.textContent = `Question: ${currentQuestionIndex + 1} / ${totalQuestions}`;
+        startTimer();
+    };
+
+    // *** MODIFIED handleAnswer Function ***
+    const handleAnswer = () => {
+        if (!gameActive) return; // Prevent handling if game ended/quit
+
+        // Stop timer immediately
+        clearInterval(timerInterval);
+        answerInput.disabled = true; // Prevent further input/submission
+
+        // Determine if this call was due to timeout (timer reached 0)
+        // We infer this if currentTime is 0 or less when handleAnswer is called
+        const wasTimeout = currentTime <= 0 && timePerQuestion > 0;
+
+        const userAnswer = answerInput.value.trim();
+        const correctAnswer = currentProblem && typeof currentProblem.a === 'number' && !isNaN(currentProblem.a) ? currentProblem.a : NaN;
+
+        // Correctness check: Must have an answer, and it must match
+        const isCorrect = userAnswer !== '' && parseInt(userAnswer) === correctAnswer;
+
+        // Clear specific feedback areas initially
+        emojiDisplay.textContent = '';
+        correctionDisplay.textContent = '';
+
+        // Log result only if the problem is valid
+        if (currentProblem) {
+             results.push({
+                problem: currentProblem,
+                userAnswer: userAnswer, // Store the actual input, even if timeout
+                isCorrect: isCorrect,
+                wasTimeout: wasTimeout && userAnswer === '' // Mark specifically if timeout AND no answer was input
+            });
+        }
+
+
+        if (isCorrect) {
+            score++;
+            scoreText.textContent = `Score: ${score}`;
+            feedbackText.textContent = 'Correct!'; // General feedback
+            feedbackText.className = 'correct';
+
+            // Display streak emoji
+            if (emojiStreakList.length > 0) {
+                emojiDisplay.textContent = emojiStreakList[currentEmojiIndex];
+                currentEmojiIndex++;
+                if (currentEmojiIndex >= emojiStreakList.length) {
+                    currentEmojiIndex = 0; // Loop back
+                }
+            }
+
+        } else {
+            // Reset emoji streak on incorrect answer or timeout
+            currentEmojiIndex = 0;
+            const displayAnswer = isNaN(correctAnswer) ? 'Error' : correctAnswer;
+
+            // Check if timeout occurred AND the input was empty
+            if (wasTimeout && userAnswer === '') {
+                feedbackText.textContent = 'Timeout!';
+                correctionDisplay.textContent = `Answer: ${displayAnswer}`;
+            } else { // Incorrect answer OR timeout with something typed
+                feedbackText.textContent = 'Incorrect!';
+                correctionDisplay.textContent = `Correct: ${displayAnswer}`;
+            }
+            feedbackText.className = 'incorrect';
+        }
+
+        // Move to the next question or end the game
+        currentQuestionIndex++;
+        // Set short timeout to allow user to see feedback before next question or results
+        setTimeout(() => {
+            if (currentQuestionIndex < totalQuestions) {
+                if (gameActive) displayProblem(); // Check gameActive again before displaying next
+            } else {
+                endGame();
+            }
+        }, isCorrect ? 1000 : 1800);
+    };
+
+
+    const endGame = () => {
+        gameActive = false; // Mark game as inactive
+        clearInterval(timerInterval); // Ensure timer is stopped
+        showScreen('results-screen');
+        finalScoreText.textContent = `Your Score: ${score} / ${totalQuestions}`;
+        displayResults();
+    };
+
+    // *** MODIFIED displayResults Function ***
+    const displayResults = () => {
+        resultsList.innerHTML = '';
+        results.forEach(result => {
+            const li = document.createElement('li');
+
+            const problemSpan = document.createElement('span');
+            problemSpan.className = 'problem';
+            const problemQ = result.problem && typeof result.problem.q === 'string' ? result.problem.q : 'N/A';
+            const problemA = result.problem && typeof result.problem.a === 'number' && !isNaN(result.problem.a) ? result.problem.a : 'N/A';
+            problemSpan.textContent = `${problemQ} = ${problemA}`;
+
+            const userAnswerSpan = document.createElement('span');
+            userAnswerSpan.className = 'user-answer ' + (result.isCorrect ? 'correct' : 'incorrect');
+            // Display '(timeout)' only if it was a timeout AND the input was empty
+            userAnswerSpan.textContent = `You: ${result.wasTimeout ? '(timeout)' : (result.userAnswer === '' ? '(no answer)' : result.userAnswer)}`;
+
+            li.appendChild(problemSpan);
+            li.appendChild(userAnswerSpan);
+
+            // Show correct answer if incorrect AND not a timeout where nothing was entered
+            if (!result.isCorrect && !result.wasTimeout) {
+                 const correctAnswerSpan = document.createElement('span');
+                correctAnswerSpan.className = 'correct-answer';
+                correctAnswerSpan.textContent = `(Was: ${problemA})`;
+                li.appendChild(correctAnswerSpan);
+            }
+             // Also show correct answer if it was a timeout but they had typed something incorrect
+             else if (result.wasTimeout && !result.isCorrect && result.userAnswer !== '') {
+                 const correctAnswerSpan = document.createElement('span');
+                 correctAnswerSpan.className = 'correct-answer';
+                 correctAnswerSpan.textContent = `(Was: ${problemA})`;
+                 li.appendChild(correctAnswerSpan);
+             }
+
+
+            resultsList.appendChild(li);
+        });
+    };
+
+    // *** NEW Function to Quit Game ***
+    const quitGame = () => {
+        gameActive = false;
+        clearInterval(timerInterval);
+        // Reset some state, but keep settings
+        currentQuestionIndex = 0;
+        score = 0;
+        results = [];
+        currentEmojiIndex = 0;
+        console.log("Game quit");
+        showScreen('setup-screen');
+    };
+
+    const startGame = () => {
+        gameActive = true; // Mark game as active
+        // Read settings from selects
+        currentLevelIndex = parseInt(levelSelect.value);
+        totalQuestions = parseInt(numQuestionsSelect.value);
+        timePerQuestion = parseInt(timeoutSelect.value);
+
+        // Reset game state
+        currentQuestionIndex = 0;
+        score = 0;
+        results = [];
+        currentEmojiIndex = 0;
+
+        // Update initial UI elements
+        scoreText.textContent = `Score: ${score}`;
+        feedbackText.textContent = '';
+        emojiDisplay.textContent = '';
+        correctionDisplay.textContent = '';
+        clearInterval(timerInterval);
+
+        // Show the training screen and start
+        showScreen('training-screen');
+        displayProblem();
+    };
+
+    // --- Event Listeners ---
+    startButton.addEventListener('click', startGame);
+
+    answerInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !answerInput.disabled && gameActive) {
+             // Handle Enter press only if game is active
+             // Check value only if Enter is pressed, otherwise timeout handles it
+             handleAnswer();
+        }
+    });
+
+    // Add listener for the close button
+    closeButton.addEventListener('click', quitGame);
+
+    restartButton.addEventListener('click', startGame); // Restarts with same settings
+
+    newGameButton.addEventListener('click', () => {
+        showScreen('setup-screen');
+    });
+
+
+    // --- Initialization ---
+    const populateLevelSelect = () => {
+        levelSelect.innerHTML = '';
+        levels.forEach((level, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = level.name;
+            levelSelect.appendChild(option);
+        });
+    };
+
+    populateLevelSelect();
+    showScreen('setup-screen');
+
+}); // End DOMContentLoaded    
+    </script>
+</body>
+</html>
