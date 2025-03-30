@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Addition Strategy Practice</title>
+    <title>Addition Practice</title>
     <style>
 /* Base Styles (Keep previous styles) */
 body {
@@ -368,21 +368,21 @@ p {
     <div class="container">
 
         <div id="setup-screen">
-             <h1>Addition Strategy Practice</h1>
-            <p>Select a strategy level and start training!</p>
+             <h1>Addition Practice</h1>
+            <p>Select a level</p>
             <div class="settings">
                 <div class="setting-item">
-                    <label for="level-select">Focus Level:</label>
+                    <label for="level-select">Level:</label>
                     <select id="level-select"></select>
                 </div>
                 <div class="setting-item">
                     <label for="num-questions">Questions:</label>
                     <select id="num-questions">
+                        <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="15" selected>15</option>
                         <option value="20">20</option>
                         <option value="25">25</option>
-                         <option value="30">30</option>
                     </select>
                 </div>
                  <div class="setting-item">
@@ -396,7 +396,7 @@ p {
                     </select>
                 </div>
             </div>
-            <button id="start-button">Start Training</button>
+            <button id="start-button">Start</button>
         </div>
 
         <div id="training-screen" class="hidden">
@@ -426,7 +426,7 @@ p {
             <ul id="results-list">
                 </ul>
             <div class="result-buttons">
-                <button id="restart-button">Train Again</button>
+                <button id="restart-button">Start Again</button>
                 <button id="new-game-button">New Game</button>
             </div>
         </div>
@@ -510,7 +510,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Problem Generation Functions (Keep the same) ---
     const problemGenerators = { /* ... (keep all 11 generator functions) ... */
-        countOn: () => { const n1=getRandomInt(1,9), n2=getRandomInt(0,2), nums=shuffleArray([n1,n2]); return { q: `${nums[0]} + ${nums[1]}`, a: n1+n2 }; },
+        countOn: () => { const n1=getRandomInt(1,9), n2=getRandomInt(1,5), nums=shuffleArray([n1,n2]); return { q: `${nums[0]} + ${nums[1]}`, a: n1+n2 }; },
         make10: () => { const n1=getRandomInt(1,9), n2=10-n1, nums=shuffleArray([n1,n2]); return { q: `${nums[0]} + ${nums[1]}`, a: 10 }; },
         doubles: () => { const n1=getRandomInt(1,9); return { q: `${n1} + ${n1}`, a: n1+n1 }; },
         nearDoubles: (l) => { const n1=getRandomInt(l.minNum,l.maxNum), d=Math.random()<0.5?1:-1; let n2=n1+d; if(n2<1)n2=n1+1; const nums=shuffleArray([n1,n2]); return { q: `${nums[0]} + ${nums[1]}`, a: n1+n2 }; },
@@ -525,8 +525,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateProblem = (levelIndex) => { /* ... (keep generation logic with 70/30 split) ... */
         const targetLevel = levels[levelIndex]; if (!targetLevel) { console.error("Invalid level index:", levelIndex); return { q: '1 + 1', a: 2 }; }
         const targetStrategy = targetLevel.strategy; let generatorKey = targetStrategy;
-        const isReview = levelIndex > 0 && Math.random() < 0.3;
-        if (isReview) { const reviewLevelIndex = getRandomInt(0, levelIndex - 1); if (levels[reviewLevelIndex]) { generatorKey = levels[reviewLevelIndex].strategy; console.log(`Review Problem: Using strategy from Level ${reviewLevelIndex + 1} (${generatorKey})`); } else { console.warn(`Could not find review level at index ${reviewLevelIndex}, using target strategy instead.`); generatorKey = targetStrategy; } } else { console.log(`New Concept Problem: Using strategy for Level ${levelIndex + 1} (${generatorKey})`); }
+        const isReview = levelIndex > 0 && Math.random() < 0.45;
+        //if (isReview) { const reviewLevelIndex = getRandomInt(0, levelIndex - 1); if (levels[reviewLevelIndex]) { generatorKey = levels[reviewLevelIndex].strategy; console.log(`Review Problem: Using strategy from Level ${reviewLevelIndex + 1} (${generatorKey})`); } else { console.warn(`Could not find review level at index ${reviewLevelIndex}, using target strategy instead.`); generatorKey = targetStrategy; } } else { console.log(`New Concept Problem: Using strategy for Level ${levelIndex + 1} (${generatorKey})`); }
+        
+        if (isReview) {
+            // Calculate the range for review levels (max 3 levels below)
+            const minReviewLevelIndex = Math.max(0, levelIndex - 3);
+            const maxReviewLevelIndex = levelIndex - 1; // Always one level below current
+            // Ensure min is not greater than max (can happen if levelIndex is 0 or 1)
+            if (minReviewLevelIndex <= maxReviewLevelIndex) {
+                const reviewLevelIndex = getRandomInt(minReviewLevelIndex, maxReviewLevelIndex);
+                // Ensure the review level exists before accessing its strategy
+                if (levels[reviewLevelIndex]) {
+                    generatorKey = levels[reviewLevelIndex].strategy;
+                    reviewLevelInfo = ` (Review from Level ${reviewLevelIndex + 1} [${minReviewLevelIndex+1}-${maxReviewLevelIndex+1}])`; // Log range
+                    console.log(`Review Problem: Using strategy ${generatorKey}${reviewLevelInfo}`);
+                } else {
+                     console.warn(`Could not find review level at index ${reviewLevelIndex}, using target strategy instead.`);
+                     generatorKey = targetStrategy; // Fallback to target strategy
+                     console.log(`New Concept Problem (Fallback): Using strategy for Level ${levelIndex + 1} (${generatorKey})`);
+                }
+            } else {
+                 // This case happens if levelIndex is 0 (no previous levels)
+                 // Stick to the target strategy
+                 generatorKey = targetStrategy;
+                 console.log(`New Concept Problem (No Review Possible): Using strategy for Level ${levelIndex + 1} (${generatorKey})`);
+            }
+        } else {
+            console.log(`New Concept Problem: Using strategy for Level ${levelIndex + 1} (${generatorKey})`);
+        }        
+        
         const generator = problemGenerators[generatorKey];
         if (generator && typeof generator === 'function') { try { let problem = generator(targetLevel); if (typeof problem.q !== 'string' || typeof problem.a !== 'number' || isNaN(problem.a)) { console.error("Generated invalid problem:", problem, "for strategy:", generatorKey); problem = { q: '1 + 1', a: 2}; } return problem; } catch (error) { console.error("Error generating problem for strategy:", generatorKey, error); return { q: '1 + 1', a: 2}; } } else { console.error("Missing or invalid generator for strategy:", generatorKey); const n1 = getRandomInt(1, 10); const n2 = getRandomInt(1, 10); return { q: `${n1} + ${n2}`, a: n1 + n2 }; }
     };
